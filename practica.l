@@ -1,26 +1,8 @@
 %{
-#define INT 257
-#define FLOAT 258
-#define DOUBLE 259
-#define CHAR 260
-#define LONG 261
-#define UNSIGNED 262
-#define CONST 263
-#define IF 264
-#define ELSE 265
-#define SWITCH 266
-#define CASE 267
-#define BREAK 268
-#define CONTINUE 269
-#define WHILE 270
-#define FOR 271
-#define DO 272
-#define DEFAULT 273
-#define GOTO 274
-#define RETURN 275
-#define index(n) n - 257
-#define NUM_RESERVED 9 - 2
+#include <stdio.h>
+#include "StringMap.h"
 %}
+
 let	[a-zA-Z]
 dig	[0-9]
 digs	{dig}+
@@ -28,54 +10,46 @@ frac	[.]{digs}
 expo	[eE][+-]?{digs}
 id	{let}({let}|{dig})*
 float	{digs}{frac}?{expo}?
+reserved {auto|if|break|int}
 comment_beg	"/*"
 comment_end	"*/"
 new_line	"\n"
 
-	int *reserved =(int*) malloc( sizeof(int) * NUM_RESERVED);
+	map *reserved = createMap();
 
-	map *hashmap = createMap();
+	map *variables = createMap();
+
 %x COMMENT STRING
 
 %%
 
-//Blanks
 [ \t]+	;
 
-//Comments
 {comment_beg} {BEGIN COMMENT;}
 <COMMENT>comment_end	{BEGIN INITIAL;}
 <COMMENT>.	{}
 
-//IDs
 id	{
-	int value = getValue(m, yytext);
-	removeElement(m, yytext);
-	addElement(m, yytext, value+1);
+	int value = getValue(variables, yytext);
+	value++;
+	removeElement(variables, yytext);
+	addElement(variables, yytext, value);
 	}
 
-//Reserved
-if	{
-	index(IF)++;
-	return IF;
-	}
-else	{
-	index(ELSE)++;
-	return ELSE;
-	}
-for	{
-	index(FOR)++;
-	return FOR;
+reserved	{
+	int value = getValue(reserved, yytext);
+	value++;
+	removeElement(reserved, yytext);
+	addElement(reserved, yytext, value);
 	}
 
-//Rest
-{new_line}	{nl++;}
+{new_line}	{}
 .		{}
 
 %%
 
-main(int argc, int **argv){
-	for(int i = 0; i < NUM_RESERVED; i++){
-		reserved[i] = 0;
-	}
+int main(int argc, char **argv){
+	yylex();
+	printf("if %d\n", getValue(reserved, "if"));
+	printf("hola %d\n", getValue(reserved, "hola"));
 }

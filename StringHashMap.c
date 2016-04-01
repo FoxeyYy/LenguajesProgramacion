@@ -77,7 +77,7 @@ int getValue(const map *m, const char *key){
 	while(n != NULL && n->next != NULL && !strcmp(n->key, key)){
 		n = n->next;
 	}
-	return (n == NULL) ? -1 : n->value;
+	return (n == NULL) ? 0 : n->value;
 }
 
 float getChargeFactor(const map *m){
