@@ -10,14 +10,14 @@ frac	[.]{digs}
 expo	[eE][+-]?{digs}
 id	{let}({let}|{dig})*
 float	{digs}{frac}?{expo}?
-reserved {auto|if|break|int}
+reserved auto|if|break|int
 comment_beg	"/*"
 comment_end	"*/"
 new_line	"\n"
 
-	map *reserved = createMap();
+	map *reserved;
 
-	map *variables = createMap();
+	map *variables;
 
 %x COMMENT STRING
 
@@ -29,19 +29,20 @@ new_line	"\n"
 <COMMENT>comment_end	{BEGIN INITIAL;}
 <COMMENT>.	{}
 
-id	{
+{reserved}	{
+	int value = getValue(reserved, yytext);
+	value++;
+	removeElement(reserved, yytext);
+	addElement(reserved, yytext, value);
+	}
+
+{id}	{
 	int value = getValue(variables, yytext);
 	value++;
 	removeElement(variables, yytext);
 	addElement(variables, yytext, value);
 	}
 
-reserved	{
-	int value = getValue(reserved, yytext);
-	value++;
-	removeElement(reserved, yytext);
-	addElement(reserved, yytext, value);
-	}
 
 {new_line}	{}
 .		{}
@@ -49,7 +50,9 @@ reserved	{
 %%
 
 int main(int argc, char **argv){
+	reserved = createMap();
+	variables = createMap();
 	yylex();
 	printf("if %d\n", getValue(reserved, "if"));
-	printf("hola %d\n", getValue(reserved, "hola"));
+	printf("hola %d\n", getValue(variables, "hola"));
 }
