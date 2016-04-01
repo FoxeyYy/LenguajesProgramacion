@@ -16,6 +16,32 @@ map* createMap(){
 	return newMap;
 }
 
+iterator* createIterator(const map *map){
+	iterator *newIterator = malloc(sizeof(iterator));
+
+	newIterator->index = -1;
+	newIterator->node = NULL;
+	newIterator->map = map;
+
+	return newIterator;
+}
+
+node* getNext(iterator *iterator){
+	if(iterator->node != NULL 
+		&& iterator->node->next != NULL){
+		return iterator->node->next;
+	}
+	
+	for(int i = iterator->index+1; i < iterator->map->maxElements; i++){
+		if(iterator->map->buckets[i] != NULL){
+			iterator->index = i;
+			return iterator->map->buckets[i];
+		}
+	}
+
+	return NULL;
+}
+
 void refactor(map *m){
 	const node **oldBuck = m->buckets;
 	m->maxElements *= 2;
@@ -68,6 +94,21 @@ void removeElement(map *m, const char *key){
 		free(cnt);
 		m->numElements--;
 	}
+}
+
+int hasNext(const iterator *iterator){
+	if(iterator->node != NULL
+		&& iterator->node->next != NULL){
+		return TRUE;
+	}
+	
+	for(int i = iterator->index + 1; i < iterator->map->maxElements; i++){
+		if(iterator->map->buckets[i] != NULL){
+			return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 int getValue(const map *m, const char *key){
