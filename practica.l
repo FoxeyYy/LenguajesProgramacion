@@ -53,6 +53,18 @@ int main(int argc, char **argv){
 	reserved = createMap();
 	variables = createMap();
 	yylex();
-	printf("if %d\n", getValue(reserved, "if"));
-	printf("hola %d\n", getValue(variables, "hola"));
+	iterator *iterator = createIterator(reserved);
+	node *node = NULL;
+	while(hasNext(iterator) == TRUE){
+		node = getNext(iterator);
+		printf("%s %d\n", node->key, node->value);
+	}
+
+	free(iterator);
+	node = NULL;
+	iterator = createIterator(variables);
+	while(hasNext(iterator) == TRUE){
+		node = getNext(iterator);
+		printf("%s %d\n", node->key, node->value);
+	}
 }
