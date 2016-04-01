@@ -29,13 +29,15 @@ iterator* createIterator(const map *map){
 node* getNext(iterator *iterator){
 	if(iterator->node != NULL 
 		&& iterator->node->next != NULL){
-		return iterator->node->next;
+		iterator->node = iterator->node->next;
+		return iterator->node;
 	}
 	
 	for(int i = iterator->index+1; i < iterator->map->maxElements; i++){
 		if(iterator->map->buckets[i] != NULL){
 			iterator->index = i;
-			return iterator->map->buckets[i];
+			iterator->node = iterator->map->buckets[i];
+			return iterator->node;
 		}
 	}
 
