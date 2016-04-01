@@ -1,12 +1,23 @@
 %{
-#define FOR 257
-#define WHILE 258
-#define SWITCH 259
-#define IF 260
-#define ELSE 261
-#define DO 262
-#define BREAK 263
-#define CONTINUE 264
+#define INT 257
+#define FLOAT 258
+#define DOUBLE 259
+#define CHAR 260
+#define LONG 261
+#define UNSIGNED 262
+#define CONST 263
+#define IF 264
+#define ELSE 265
+#define SWITCH 266
+#define CASE 267
+#define BREAK 268
+#define CONTINUE 269
+#define WHILE 270
+#define FOR 271
+#define DO 272
+#define DEFAULT 273
+#define GOTO 274
+#define RETURN 275
 #define index(n) n - 257
 #define NUM_RESERVED 9 - 2
 %}
@@ -21,31 +32,41 @@ comment_beg	"/*"
 comment_end	"*/"
 new_line	"\n"
 
-	int *reserved =(int*) malloc( sizeof(int) * NUM_RESERVED); //TODO inicializar
-	int yylval = 0,
-		nl = 1;
+	int *reserved =(int*) malloc( sizeof(int) * NUM_RESERVED);
+
+	map *hashmap = createMap();
 %x COMMENT STRING
 
 %%
 
 //Blanks
-[ \t]+	; //TODO esta bien?
+[ \t]+	;
 
 //Comments
 {comment_beg} {BEGIN COMMENT;}
 <COMMENT>comment_end	{BEGIN INITIAL;}
 <COMMENT>.	{}
 
+//IDs
+id	{
+	int value = getValue(m, yytext);
+	removeElement(m, yytext);
+	addElement(m, yytext, value+1);
+	}
+
 //Reserved
-if	{yylval = nl;
+if	{
 	index(IF)++;
-	return IF;}
-else	{yylval = nl;
+	return IF;
+	}
+else	{
 	index(ELSE)++;
-	return ELSE;}
-for	{yylval = nl;
+	return ELSE;
+	}
+for	{
 	index(FOR)++;
-	return FOR;}
+	return FOR;
+	}
 
 //Rest
 {new_line}	{nl++;}
@@ -54,4 +75,7 @@ for	{yylval = nl;
 %%
 
 main(int argc, int **argv){
+	for(int i = 0; i < NUM_RESERVED; i++){
+		reserved[i] = 0;
+	}
 }
