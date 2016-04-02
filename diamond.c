@@ -9,7 +9,7 @@ int main()
  
   space = n - 1;
  
-  for (k = 1; k <= n; k++)
+  for (d = 1; d <= n; d++)
   {
     for (c = 1; c <= space; c++)
       printf(" ");

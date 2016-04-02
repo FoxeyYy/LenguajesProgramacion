@@ -66,6 +66,12 @@ int main(int argc, char **argv){
 		printf("No ha introducido correctamente el nombre del fichero c para analizar\n");
 		exit(1);
 	}
+	
+	if(strstr(argv[1],".c")==NULL){
+		printf("No ha introducido un fichero .c\n");
+		exit(-1);
+	}
+	
 	FILE *salidaReserved = fopen("palabras_reservadas.txt","w+");
 	FILE *salidaVariables = fopen("identificadores.txt","w+");
 
