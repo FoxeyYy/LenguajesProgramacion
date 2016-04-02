@@ -117,10 +117,10 @@ int getValue(const map *m, const char *key){
 	const hash index = getHash(key) % m->maxElements;
 	node *n = m->buckets[index];
 
-	while(n != NULL && n->next != NULL && !strcmp(n->key, key)){
+	while(n != NULL && n->next != NULL && strcmp(n->key, key) != 0){
 		n = n->next;
 	}
-	return (n == NULL) ? 0 : n->value;
+	return (n != NULL && strcmp(n->key, key) == 0) ? n->value : 0;
 }
 
 float getChargeFactor(const map *m){
