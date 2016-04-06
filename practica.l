@@ -23,20 +23,21 @@ hash		"#"
 
 	map *variables;
 
-%x COMMENT STRING HEADERS IN_COMMENT 
+%x COMMENT STRING HEADERS COMMENT_LINE 
 
 %%
 
 [ \t]+]	;
 
-{comment_line}	{BEGIN IN_COMMENT;}
-<IN_COMMENT>{new_line}	{BEGIN INITIAL;}
-<IN_COMMENT>.	;
+{comment_line}	{BEGIN COMMENT_LINE;}
+<COMMENT_LINE>{new_line}	{BEGIN INITIAL;}
+<COMMENT_LINE>.	;
 
 
 {comment_beg} {BEGIN COMMENT;}
 <COMMENT>{comment_end}	{BEGIN INITIAL;}
 <COMMENT>.	;
+<COMMENT>{new_line}	;
 
 {quote_beg}		{BEGIN STRING;}
 <STRING>{quote_end} {BEGIN INITIAL;}
@@ -60,7 +61,6 @@ hash		"#"
 	removeElement(variables, yytext);
 	addElement(variables, yytext, value);
 	}
-
 
 {new_line}	;	
 .		;		
