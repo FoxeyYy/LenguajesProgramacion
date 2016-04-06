@@ -13,6 +13,7 @@ float	{digs}{frac}?{expo}?
 reserved auto|if|break|int|case|long|char|register|continue|return|default|short|do|sizeof|double|static|else|struct|entry|switch|extern|typedef|float|union|for|unsigned|goto|while|enum|void|const|signed|volatile
 comment_beg	"/*"
 comment_end	"*/"
+comment_line	"//"
 new_line	"\n"
 quote_beg	["]
 quote_end	[^\\]["]
@@ -22,23 +23,28 @@ hash		"#"
 
 	map *variables;
 
-%x COMMENT STRING HEADERS
+%x COMMENT STRING HEADERS IN_COMMENT 
 
 %%
 
-[ \t]+	;
+[ \t]+]	;
+
+{comment_line}	{BEGIN IN_COMMENT;}
+<IN_COMMENT>{new_line}	{BEGIN INITIAL;}
+<IN_COMMENT>.	;
+
 
 {comment_beg} {BEGIN COMMENT;}
 <COMMENT>{comment_end}	{BEGIN INITIAL;}
-<COMMENT>.	{}
+<COMMENT>.	;
 
 {quote_beg}		{BEGIN STRING;}
 <STRING>{quote_end} {BEGIN INITIAL;}
-<STRING>.	{}
+<STRING>.	;
 
 {hash} {BEGIN HEADERS;}
 <HEADERS>{new_line}	{BEGIN INITIAL;}
-<HEADERS>.	{}
+<HEADERS>.	;
 
 
 {reserved}	{
@@ -56,8 +62,8 @@ hash		"#"
 	}
 
 
-{new_line}	{}
-.		{}
+{new_line}	;	
+.		;		
 
 %%
 
