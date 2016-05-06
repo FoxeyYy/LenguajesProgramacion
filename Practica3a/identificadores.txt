@@ -1,0 +1,5 @@
+k 3
+space 7
+n 6
+printf 10
+main 1
