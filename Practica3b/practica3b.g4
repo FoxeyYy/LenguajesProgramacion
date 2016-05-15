@@ -2,10 +2,10 @@ grammar practica3b;
 
 prog	:	interfaz*;
 
-interfaz:	tipo ID parametros '{' llamadas* '}'
+interfaz:	tipo ID parametros '{' llamada* '}' {System.out.println("Funcion " + $ID.text);}
 	;
 
-llamadas:	ID parametros
+llamada	:	ID parametros	{System.out.println("\t llamada " + $ID.text);}
 	;
 
 parametros:	'(' listaParametros? ')'
@@ -15,6 +15,7 @@ listaParametros:	parametro (',' parametro)*
 	;
 
 parametro:	tipo? ID
+	| llamada
 	;
 
 tipo	:	ID
