@@ -1,0 +1,25 @@
+#define hola a
+#pragma yoquese
+
+/* test 
+	test*/
+
+//Funcion
+void a(){
+
+}
+
+//Prototipo
+int z(int j);
+
+//Otro mas complicado
+c b(int h){
+	i = j + h();
+}
+
+//la repolla
+void main(int* argc, char* argv[]){
+	if(a(b(c))){
+		i++;
+	}
+}
