@@ -9,8 +9,8 @@ prototipo:	tipo? ID '(' listaParametros ')' ';'
 interfaz:	tipo? ID parametros '{' cuerpo '}' {System.out.println("Funcion " + $ID.text + "\n\n\n");}
 	;
 
-cuerpo	:	'{' (sentencia|control)* '}'
-	|	(sentencia|control|bucle|declaracionVariable)*
+cuerpo	:	'{' (sentencia|control|bucle)* '}'
+	|	(sentencia|control|bucle)*
 	;
 
 declaracionVariable: tipo variable sentencia? ';'?
@@ -25,7 +25,7 @@ structOrUnion:	('struct'|'union') variable? '{' declaracionVariable+ '}' variabl
 	;
 
 bucle	:	'while' '(' expresion ')' cuerpo
-	|	'do' cuerpo	'while' '(' expresion ')' ';'
+	|	'do' cuerpo	'while' '(' sentencia ')' ';'
 	|	'for' '(' expresion? ';' expresion? ';' expresion? ')' cuerpo
 	;
 
@@ -33,15 +33,15 @@ control	:	'if' '(' expresion ')' cuerpo ('else' cuerpo)?
 	| 'switch' '(' expresion ')' '{' ('case' (ID|DIG+|LITERAL) ':' cuerpo)+ '}'
 	;
 
-expresion	:	(variable|DIG+|llamada|inicializacionArray) sentencia?
-	|	OPERADOR sentencia
+expresion	:	(variable|DIG+|llamada|inicializacionArray) expresion?
+	|	OPERADOR expresion?
 	;
 
 inicializacionArray: '{' expresion(',' expresion)* '}'
 	;
 
-sentencia:	expresion
-	|	';'
+sentencia:	expresion ';'
+	|	declaracionVariable ';'
 	;
 
 llamada	:	ID parametros	{System.out.println("\t llamada " + $ID.text);}
