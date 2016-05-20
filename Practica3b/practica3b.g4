@@ -33,8 +33,11 @@ control	:	'if' '(' expresion ')' cuerpo ('else' cuerpo)?
 	| 	'switch' '(' expresion ')' '{' ('case' (ID|literal) ':' cuerpo)+ '}'
 	;
 
-expresion:	cast? (literal|variable|llamada|inicializacionArray|todo) ('[' expresion ']')? expresion?
+expresion:	(literal|variable|llamada|inicializacionArray|todo) expresion?
+	|	 expresion array
 	|	'(' expresion ')'
+	|	cast expresion
+	|	expresion todo expresion
 	;
 
 inicializacionArray: '{' expresion(',' expresion)* '}'
@@ -66,6 +69,7 @@ tipo	:	ID '*'*
 	;
 
 variable:	ID array*
+	|	'(' variable ')'
 	;
 
 array	:	'[' expresion? ']'
