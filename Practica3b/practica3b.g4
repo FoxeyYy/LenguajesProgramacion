@@ -3,6 +3,7 @@ grammar practica3b;
 prog	:	(interfaz|prototipo)*
 	;
 
+<<<<<<< Updated upstream
 prototipo:	tipo? ID '(' listaParametros ')' ';'
 	;
 
@@ -16,6 +17,15 @@ sentencia:	';'
 	|	variable sentencia
 	|	OPERADOR sentencia
 	|	llamada sentencia
+=======
+interfaz:	tipo ID parametros '{' cuerpo '}' {System.out.println("Funcion " + $ID.text);}
+	;
+
+cuerpo	:	(llamada|otro)*
+	;
+
+otro	:	OTRO
+>>>>>>> Stashed changes
 	;
 
 llamada	:	ID parametros	{System.out.println("\t llamada " + $ID.text);}
@@ -39,8 +49,12 @@ variable:	ID array*
 
 array	:	'[' ']'
 	;
+<<<<<<< Updated upstream
 
 ID	:	LET(LET|DIG)*;
+=======
+OTRO	:	[^ID];
+>>>>>>> Stashed changes
 LET	:	[a-zA-Z];
 DIG	:	[0-9];
 OPERADOR:	[-+=*/!|&];
