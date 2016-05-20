@@ -6,14 +6,14 @@ prog	:	(interfaz|prototipo|declaracionVariable)*
 prototipo:	tipo? ID '(' listaParametros ')' ';'
 	;
 
-interfaz:	tipo? ID parametros '{' cuerpo '}' {System.out.println("Funcion " + $ID.text + "\n\n\n");}
+interfaz:	tipo? ID parametros cuerpo {System.out.println("Funcion " + $ID.text + "\n\n\n");}
 	;
 
-cuerpo	:	'{' (sentencia|control|bucle)* '}'
-	|	(sentencia|control|bucle)*
+cuerpo	:	'{' cuerpo* '}'
+	|	(sentencia|control|bucle)
 	;
 
-declaracionVariable: tipo variable sentencia? ';'?
+declaracionVariable: tipo variable expresion? (',' variable expresion?)* ';'?
 	| 	typedef ';'?
 	|	structOrUnion ';'?
 	;
@@ -30,11 +30,11 @@ bucle	:	'while' '(' expresion ')' cuerpo
 	;
 
 control	:	'if' '(' expresion ')' cuerpo ('else' cuerpo)?
-	| 'switch' '(' expresion ')' '{' ('case' (ID|literal) ':' cuerpo)+ '}'
+	| 	'switch' '(' expresion ')' '{' ('case' (ID|literal) ':' cuerpo)+ '}'
 	;
 
-expresion	:	(literal|variable|llamada|inicializacionArray) expresion?
-	|	OPERADOR expresion?
+expresion:	cast? (literal|variable|llamada|inicializacionArray|todo) ('[' expresion ']')? expresion?
+	|	'(' expresion ')'
 	;
 
 inicializacionArray: '{' expresion(',' expresion)* '}'
@@ -42,6 +42,7 @@ inicializacionArray: '{' expresion(',' expresion)* '}'
 
 sentencia:	expresion ';'
 	|	declaracionVariable ';'
+	|	';'
 	;
 
 llamada	:	ID parametros	{System.out.println("\t llamada " + $ID.text);}
@@ -53,12 +54,15 @@ parametros:	'(' listaParametros? ')'
 listaParametros:	parametro (',' parametro)*
 	;
 
-parametro:	tipo? variable
-	| llamada
-	| literal
+parametro:	tipo? expresion
 	;
 
-tipo	:	ID'*'*
+todo	: OPERADOR+|('*'OPERADOR*)+;
+
+cast	:	'(' tipo ')'
+	;
+
+tipo	:	ID '*'*
 	;
 
 variable:	ID array*
@@ -68,7 +72,7 @@ array	:	'[' expresion? ']'
 	;
 
 literal:	DIG+
-	|	STRING
+	|	STRING+
 	|	CHAR
 	;
 
@@ -77,7 +81,7 @@ LET	:	[a-zA-Z];
 DIG	:	[0-9];
 STRING	:	'"' ~["\r\n]* '"';
 CHAR	:	['] ~['\r\n] ['];
-OPERADOR:	[-+*/%=><!|&\.]+;
+OPERADOR:	[-+/%=\*><!|&.];
 WS	:	[ \t\n]+ -> skip;
 SALTO	:	('goto'|'continue'|'break'|'return') ~[\r\n;]* ';'-> skip;
 COMENTARIO:	'/*' .*? '*/' -> skip;
