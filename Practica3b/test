@@ -1,0 +1,41 @@
+#define hola a
+#pragma yoquese
+
+/* test
+	test*/
+
+//declaracion externa
+int b;
+int c = b;
+
+typedef struct prueba{
+	int a;
+}test;
+
+//Funcion
+void a(){
+
+}
+
+//Prototipo
+int z(int j);
+
+//Otro mas complicado
+c b(int h){
+	i = j + h();
+	b = "hola";
+	printf("hola y adios\n");
+}
+
+//la repolla
+void main(int* argc, char* argv[]){
+	if(a(b(c))){
+		i++;
+	}
+
+	switch(z + j()){
+		case 1: hola;
+		case 2:
+			for(;;) test(); break    	;
+	}
+}
