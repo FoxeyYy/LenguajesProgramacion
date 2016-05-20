@@ -47,11 +47,11 @@ control	:	'if' '(' expresion ')' cuerpo ('else' cuerpo)?
 	| 	'switch' '(' expresion ')' '{' ('case' (ID|literal) ':' cuerpo)+ '}'
 	;
 
-expresion:	(literal|variable|llamada|inicializacionArray|todo) expresion?
+expresion:	(literal|llamada|variable|inicializacionArray|operacion) expresion?
 	|	expresion array
 	|	'(' expresion ')'
 	|	cast expresion
-	|	expresion todo expresion
+	|	expresion operacion expresion
 	;
 
 inicializacionArray: '{' expresion(',' expresion)* '}'
@@ -74,12 +74,16 @@ listaParametros:	parametro (',' parametro)*
 parametro:	tipo? expresion
 	;
 
-todo	: OPERADOR+|('*'OPERADOR*)+|'=';
+operacion:	operacionSimple+|asignacion
+	;
+
+operacionSimple	: '=' | '>' | '<' | '*' | '/' | '%' | '+' | '-' | '!' | '|' | '&' | '.'
+	;
 
 cast	:	'(' tipo ')'
 	;
 
-tipo	:	ID '*'*
+tipo	:	ID+ '*'*
 	;
 
 variable:	'*'* ID array*
@@ -99,7 +103,7 @@ LET	:	[a-zA-Z];
 DIG	:	[0-9];
 STRING	:	'"' ~["\r\n]* '"';
 CHAR	:	['] ~['\r\n] ['];
-OPERADOR:	[-+/%=\*><!|&.];
+
 WS	:	[ \t\n]+ -> skip;
 SALTO	:	('goto'|'continue'|'break'|'return') ~[\r\n;]* ';'-> skip;
 COMENTARIO:	'/*' .*? '*/' -> skip;
