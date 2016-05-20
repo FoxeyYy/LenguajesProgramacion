@@ -4,6 +4,14 @@
 /* test 
 	test*/
 
+//declaracion externa
+int b;
+int c = b;
+
+typedef struct prueba{
+	int a;
+}test;
+
 //Funcion
 void a(){
 
@@ -21,5 +29,11 @@ c b(int h){
 void main(int* argc, char* argv[]){
 	if(a(b(c))){
 		i++;
+	}
+	
+	switch(z + j()){
+		case 1: hola;
+		case 2:
+			for(;;) test(); break    	;
 	}
 }
