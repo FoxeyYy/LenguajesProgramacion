@@ -14,7 +14,7 @@ cuerpo	:	'{' (sentencia|control|bucle)* '}'
 	;
 
 declaracionVariable: tipo variable sentencia? ';'?
-	| typedef ';'?
+	| 	typedef ';'?
 	|	structOrUnion ';'?
 	;
 
@@ -30,10 +30,10 @@ bucle	:	'while' '(' expresion ')' cuerpo
 	;
 
 control	:	'if' '(' expresion ')' cuerpo ('else' cuerpo)?
-	| 'switch' '(' expresion ')' '{' ('case' (ID|DIG+|LITERAL) ':' cuerpo)+ '}'
+	| 'switch' '(' expresion ')' '{' ('case' (ID|literal) ':' cuerpo)+ '}'
 	;
 
-expresion	:	(variable|DIG+|llamada|inicializacionArray) expresion?
+expresion	:	(literal|variable|llamada|inicializacionArray) expresion?
 	|	OPERADOR expresion?
 	;
 
@@ -55,6 +55,7 @@ listaParametros:	parametro (',' parametro)*
 
 parametro:	tipo? variable
 	| llamada
+	| literal
 	;
 
 tipo	:	ID'*'*
@@ -66,10 +67,16 @@ variable:	ID array*
 array	:	'[' expresion? ']'
 	;
 
+literal:	DIG+
+	|	STRING
+	|	CHAR
+	;
+
 ID	:	'_'?LET(LET|DIG|'_')*;
 LET	:	[a-zA-Z];
 DIG	:	[0-9];
-LITERAL:	['"](ID|DIG*)['"];
+STRING	:	'"' ~["\r\n]* '"';
+CHAR	:	['] ~['\r\n] ['];
 OPERADOR:	[-+*/%=><!|&\.]+;
 WS	:	[ \t\n]+ -> skip;
 SALTO	:	('goto'|'continue'|'break'|'return') ~[\r\n;]* ';'-> skip;
