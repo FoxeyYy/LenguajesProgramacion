@@ -1,12 +1,28 @@
 grammar practica3b;
 
-prog	:	(interfaz|prototipo|declaracionVariable)*
+
+@header{
+import java.util.*;
+}
+
+
+@parser::members{
+	LinkedList queue = new LinkedList();
+
+	void print(){
+		while(!queue.isEmpty()){
+			System.out.println(queue.poll());
+		}
+	}
+}
+
+prog	:	(interfaz|prototipo|declaracionVariable)* {print();}
 	;
 
 prototipo:	modificador* tipo? ID '(' listaParametros ')' ';'
 	;
 
-interfaz:	modificador* tipo? ID parametros cuerpo {System.out.println("Funcion " + $ID.text + "\n\n\n");}
+interfaz:	modificador* tipo? ID parametros cuerpo {System.out.println("Funcion " + $ID.text + "\n\n\n");print();}
 	;
 
 cuerpo	:	'{' cuerpo* '}'
@@ -62,7 +78,7 @@ sentencia:	expresion ';'
 	|	';'
 	;
 
-llamada	:	ID parametros	{System.out.println("\t llamada " + $ID.text);}
+llamada	:	ID parametros	{queue.add("\t llamada " +$ID.text +  $parametros.text);}
 	;
 
 parametros:	'(' listaParametros? ')'
@@ -71,7 +87,7 @@ parametros:	'(' listaParametros? ')'
 listaParametros:	parametro (',' parametro)*
 	;
 
-parametro:	tipo? expresion
+parametro:	tipo? expresion 
 	;
 
 operacion:	operacionSimple+|asignacion
