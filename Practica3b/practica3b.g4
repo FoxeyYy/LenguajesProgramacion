@@ -9,24 +9,42 @@ import java.util.*;
 @parser::members{
 	LinkedList queue = new LinkedList();
 
+	ArrayList<String> local = new ArrayList();	
+	ArrayList<String> global = new ArrayList();	
+
 	void print(){
 		while(!queue.isEmpty()){
 			System.out.println(queue.poll());
 		}
 	}
+	
+	String check(String var){
+		if(local.contains(var))
+			return "Local" + var;
+		else if(global.contains(var)){ 
+			return "Global " + var;
+		}return var;
+	}
 }
 
-prog	:	(interfaz|prototipo|declaracionVariable)* {print();}
+prog	:	(interfaz|prototipo|declaracionVarGlobal)*  {print();}
 	;
 
 prototipo:	modificador* tipo? ID '(' listaParametros ')' ';'
 	;
 
-interfaz:	modificador* tipo? ID parametros cuerpo {System.out.println("Funcion " + $ID.text + "\n\n\n");print();}
+interfaz:	modificador* tipo? ID parametros cuerpo {System.out.println("Funcion " + $ID.text );print();}
 	;
 
 cuerpo	:	'{' cuerpo* '}'
 	|	(sentencia|control|bucle)
+	;
+
+	
+declaracionVarGlobal : declaracionVariable 		{System.out.println("Global " + $declaracionVariable.text);global.add($declaracionVariable.text);}
+	;
+
+declaracionVarLocal : declaracionVariable 		{local.add($declaracionVariable.text);queue.add("	Local " + $declaracionVariable.text);}
 	;
 
 declaracionVariable: modificador* tipo variable asignacion? (',' variable asignacion?)* ';'
@@ -73,12 +91,12 @@ expresion:	(literal|llamada|variable|inicializacionArray|operacion) expresion?
 inicializacionArray: '{' expresion(',' expresion)* '}'
 	;
 
-sentencia:	expresion ';'
-	|	declaracionVariable
+sentencia:	declaracionVarLocal
+	|	expresion ';'
 	|	';'
 	;
 
-llamada	:	ID parametros	{queue.add("\t llamada " +$ID.text +  $parametros.text);}
+llamada	locals[String ambito]:	ID parametros	{$ambito = check($parametros.text);queue.add("	Llamada "+ $ID.text +" parametros "+ $ambito);}
 	;
 
 parametros:	'(' listaParametros? ')'
@@ -93,7 +111,7 @@ parametro:	tipo? expresion
 operacion:	operacionSimple+|asignacion
 	;
 
-operacionSimple	: '=' | '>' | '<' | '*' | '/' | '%' | '+' | '-' | '!' | '|' | '&' | '.'
+operacionSimple	:  '>' | '<' | '*' | '/' | '%' | '+' | '-' | '!' | '|' | '&' | '.'
 	;
 
 cast	:	'(' tipo ')'
@@ -103,7 +121,6 @@ tipo	:	ID+ '*'*
 	;
 
 variable:	'*'* ID array*
-	|	'(' variable ')'
 	;
 
 array	:	'[' expresion? ']'
