@@ -12,6 +12,8 @@ import java.util.*;
 	HashMap<String,String> local = new HashMap();	
 	HashMap<String,String> global = new HashMap();	
 	
+	ArrayList<String> programLocal = new ArrayList();
+	ArrayList<String> programGlobal = new ArrayList();
 	void print(){
 		while(!queue.isEmpty()){
 			System.out.println(queue.poll());
@@ -19,18 +21,25 @@ import java.util.*;
 	}
 	
 	String check(String var){
+		var = var.replace("&","");
+		var = var.replace("*","");
 		var = var.substring(1,var.length()-1);
 		String[] parametros = var.split(",");
 		String variables = "";
 		for(String parametro : parametros){
-			if(local.containsKey(parametro))
+			if(local.containsKey(parametro)&&local.get(var)!=null)
 				variables +="Local " + parametro +" ";
-			else if(global.containsKey(parametro)){ 
+			else if(global.containsKey(parametro)&&global.get(var)!=null){ 
 				variables +="Global " + parametro + " ";
 			}else 
 				variables += parametro + " ";
 		}
 		return variables;
+	}
+
+	void addLocal(String var, String tipo){
+	if(!local.containsKey(var))
+		local.put(var,tipo);
 	}
 }
 
@@ -40,7 +49,7 @@ prog	:	(interfaz|prototipo|declaracionVarGlobal)*  {print();}
 prototipo:	modificador* tipo? ID '(' listaParametros ')' ';'
 	;
 
-interfaz:	modificador* tipo? ID parametros cuerpo {System.out.println("Funcion " + $ID.text );print();}
+interfaz:	modificador* tipo? ID parametros cuerpo {System.out.println("Funcion " + $ID.text );print(); local.clear();}
 	;
 
 cuerpo	:	'{' cuerpo* '}'
@@ -48,13 +57,18 @@ cuerpo	:	'{' cuerpo* '}'
 	;
 
 	
-declaracionVarGlobal : declaracionVariable 		{System.out.println("Global " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1]);global.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}
+declaracionVarGlobal : declaracionVariable 		{System.out.println("Global " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1]);
+							global.put($declaracionVariable.var[1],$declaracionVariable.var[0]);
+							programLocal.add($declaracionVariable.var[0] + " " + $declaracionVariable.var[1]);}
 	;
 
-declaracionVarLocal : declaracionVariable 		{System.out.println("Clave guardada: "+$declaracionVariable.var[1]);local.put($declaracionVariable.var[1],$declaracionVariable.var[0]);queue.add("	Local " + $declaracionVariable.var[0]+ " " +$declaracionVariable.var[1]);}
+declaracionVarLocal : declaracionVariable 		{local.put($declaracionVariable.var[1],$declaracionVariable.var[0]);
+							queue.add("	Local " + $declaracionVariable.var[0]+ " " +$declaracionVariable.var[1]);
+							programLocal.add($declaracionVariable.var[0] + " " + $declaracionVariable.var[1]);}
 	;
 
-declaracionVariable returns [String[] var] : modificador* tipo variable asignacion? (',' variable asignacion?)* ';' {$var = new String[2];$var[0] = $tipo.text; $var[1] = $variable.text;}
+declaracionVariable returns [String[] var] : modificador* tipo variable asignacion? (',' variable asignacion?)* ';' {$var = new String[2];$var[0] = $tipo.text;
+															 $var[1] = $variable.var;}
 	|	modificador* structOrUnion ';'
 	|	modificador* enumDecl ';'
 	;
@@ -103,7 +117,8 @@ sentencia:	declaracionVarLocal
 	|	';'
 	;
 
-llamada	locals[String ambito]:	ID parametros	{System.out.println("Parametro "+$parametros.text);$ambito = check($parametros.text);queue.add("	Llamada "+ $ID.text +" parametros "+ $ambito);}
+llamada	locals[String ambito]:	ID parametros	{$ambito = check($parametros.text);
+						queue.add("	Llamada "+ $ID.text +" parametros( "+ $ambito +" )");}
 	;
 
 parametros:	'(' listaParametros? ')'
@@ -112,7 +127,7 @@ parametros:	'(' listaParametros? ')'
 listaParametros:	parametro (',' parametro)*
 	;
 
-parametro:	tipo? expresion 
+parametro:	tipo? expresion			{addLocal($expresion.text,$tipo.text);}
 	;
 
 operacion:	operacionSimple+|asignacion
@@ -127,7 +142,7 @@ cast	:	'(' tipo ')'
 tipo	:	ID+ '*'*
 	;
 
-variable:	'*'* ID array*
+variable returns[String var]:	('*'*|'&'*) ID array* {$var = $ID.text;}
 	;
 
 array	:	'[' expresion? ']'
