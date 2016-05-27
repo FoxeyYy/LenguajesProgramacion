@@ -27,9 +27,9 @@ import java.util.*;
 		String[] parametros = var.split(",");
 		String variables = "";
 		for(String parametro : parametros){
-			if(local.containsKey(parametro)&&local.get(var)!=null)
+			if(local.containsKey(parametro)){
 				variables +="Local " + parametro +" ";
-			else if(global.containsKey(parametro)&&global.get(var)!=null){ 
+			}else if(global.containsKey(parametro)){ 
 				variables +="Global " + parametro + " ";
 			}else 
 				variables += parametro + " ";
@@ -38,12 +38,13 @@ import java.util.*;
 	}
 
 	void addLocal(String var, String tipo){
-	if(!local.containsKey(var))
+	if(!local.containsKey(var)&&tipo!=null)
 		local.put(var,tipo);
 	}
+	
 }
 
-prog	:	(interfaz|prototipo|declaracionVarGlobal)*  {print();}
+prog	:	(interfaz|prototipo|declaracionVarGlobal|declaracionVarExterna)*  {print();}
 	;
 
 prototipo:	modificador* tipo? ID '(' listaParametros ')' ';'
