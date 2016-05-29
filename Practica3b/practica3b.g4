@@ -11,6 +11,7 @@ import java.util.*;
 
 	HashMap<String,String> local = new HashMap();	
 	HashMap<String,String> global = new HashMap();	
+	HashMap<String,String> extern = new HashMap();	
 	
 	void print(){
 		while(!queue.isEmpty()){
@@ -29,7 +30,9 @@ import java.util.*;
 				variables +="Local " + parametro +" ";
 			}else if(global.containsKey(parametro)){ 
 				variables +="Global " + parametro + " ";
-			}else 
+			}else if(extern.containsKey(parametro)){
+				variables +="Externa " + parametro + " "; 
+			}else	
 				variables += parametro + " ";
 		}
 		return variables;
@@ -42,7 +45,7 @@ import java.util.*;
 	
 }
 
-prog	:	(interfaz|prototipo|declaracionVarGlobal)*  {print();}
+prog	:	(interfaz|prototipo|declaracionVarGlobal|declaracionVarExterna|declaracionTipo)*  {print();}
 	;
 
 prototipo:	modificador* tipo? ID '(' listaParametros ')' ';'
@@ -56,6 +59,10 @@ cuerpo	:	'{' cuerpo* '}'
 	;
 
 	
+declaracionVarExterna : 'extern' declaracionVariable	{System.out.println("Variable externa " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1]);
+							extern.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}	
+	;
+
 declaracionVarGlobal : declaracionVariable 		{System.out.println("Variable global " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1]);
 							global.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}
 	;
@@ -64,11 +71,14 @@ declaracionVarLocal : declaracionVariable 		{local.put($declaracionVariable.var[
 							queue.add("	Variable local " + $declaracionVariable.var[0]+ " " +$declaracionVariable.var[1]);}
 	;
 
-declaracionVariable returns [String[] var] : modificador* tipo variable asignacion? (',' variable asignacion?)* ';' {$var = new String[2];$var[0] = $tipo.text;
+declaracionVariable returns [String[] var] :  tipo variable asignacion? (',' variable asignacion?)* ';' {$var = new String[2];$var[0] = $tipo.text;
 															 $var[1] = $variable.var;}
-	|	modificador* structOrUnion ';'
+	;
+
+declaracionTipo : modificador* structOrUnion ';'
 	|	modificador* enumDecl ';'
 	;
+	
 
 asignacion:	('=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|=') expresion
 	;
