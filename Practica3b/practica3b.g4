@@ -12,8 +12,6 @@ import java.util.*;
 	HashMap<String,String> local = new HashMap();	
 	HashMap<String,String> global = new HashMap();	
 	
-	ArrayList<String> programLocal = new ArrayList();
-	ArrayList<String> programGlobal = new ArrayList();
 	void print(){
 		while(!queue.isEmpty()){
 			System.out.println(queue.poll());
@@ -44,7 +42,7 @@ import java.util.*;
 	
 }
 
-prog	:	(interfaz|prototipo|declaracionVarGlobal|declaracionVarExterna)*  {print();}
+prog	:	(interfaz|prototipo|declaracionVarGlobal)*  {print();}
 	;
 
 prototipo:	modificador* tipo? ID '(' listaParametros ')' ';'
@@ -58,14 +56,12 @@ cuerpo	:	'{' cuerpo* '}'
 	;
 
 	
-declaracionVarGlobal : declaracionVariable 		{System.out.println("Global " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1]);
-							global.put($declaracionVariable.var[1],$declaracionVariable.var[0]);
-							programLocal.add($declaracionVariable.var[0] + " " + $declaracionVariable.var[1]);}
+declaracionVarGlobal : declaracionVariable 		{System.out.println("Variable global " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1]);
+							global.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}
 	;
 
 declaracionVarLocal : declaracionVariable 		{local.put($declaracionVariable.var[1],$declaracionVariable.var[0]);
-							queue.add("	Local " + $declaracionVariable.var[0]+ " " +$declaracionVariable.var[1]);
-							programLocal.add($declaracionVariable.var[0] + " " + $declaracionVariable.var[1]);}
+							queue.add("	Variable local " + $declaracionVariable.var[0]+ " " +$declaracionVariable.var[1]);}
 	;
 
 declaracionVariable returns [String[] var] : modificador* tipo variable asignacion? (',' variable asignacion?)* ';' {$var = new String[2];$var[0] = $tipo.text;
@@ -119,7 +115,7 @@ sentencia:	declaracionVarLocal
 	;
 
 llamada	locals[String ambito]:	ID parametros	{$ambito = check($parametros.text);
-						queue.add("	Llamada "+ $ID.text +" parametros( "+ $ambito +" )");}
+						queue.add("	Llama a la función "+ $ID.text +" con los parametros( "+ $ambito +" )");}
 	;
 
 parametros:	'(' listaParametros? ')'
