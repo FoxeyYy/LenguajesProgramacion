@@ -9,26 +9,26 @@ import java.io.*;
 
 @parser::members{
 
-	LinkedList queue = new LinkedList();
-	LinkedList programQueue = new LinkedList();
+	LinkedList colaLocal = new LinkedList();
+	LinkedList colaPrograma = new LinkedList();
 
-	HashMap<String,String> local = new HashMap();	
-	HashMap<String,String> global = new HashMap();	
-	HashMap<String,String> extern = new HashMap();	
+	HashMap<String,String> varLocales = new HashMap();	
+	HashMap<String,String> varGlobales = new HashMap();	
+	HashMap<String,String> varExternas = new HashMap();	
 	
 	
-	String check(String var){
+	String ambito(String var){
 		var = var.replace("&","");
 		var = var.replace("*","");
 		var = var.substring(1,var.length()-1);
 		String[] parametros = var.split(",");
 		String variables = "";
 		for(String parametro : parametros){
-			if(local.containsKey(parametro)){
+			if(varLocales.containsKey(parametro)){
 				variables +="Local " + parametro +" ";
-			}else if(global.containsKey(parametro)){ 
+			}else if(varGlobales.containsKey(parametro)){ 
 				variables +="Global " + parametro + " ";
-			}else if(extern.containsKey(parametro)){
+			}else if(varExternas.containsKey(parametro)){
 				variables +="Externa " + parametro + " "; 
 			}else	
 				variables += parametro + " ";
@@ -36,22 +36,22 @@ import java.io.*;
 		return variables;
 	}
 
-	void check(String var, String tipo){
-	if(!local.containsKey(var)&&tipo!=null) 
-		local.put(var,tipo);
+	void comprobar(String var, String tipo){
+	if(!varLocales.containsKey(var)&&tipo!=null) 
+		varLocales.put(var,tipo);
 	}
 
-	void copy(){
-		while(!queue.isEmpty())
-			programQueue.add(queue.remove());
+	void localAGlobal(){
+		while(!colaLocal.isEmpty())
+			colaPrograma.add(colaLocal.remove());
 	}
 	
-	void print(){
+	void guardar(){
 		try{
 			File fichero = new File("Resultados.txt");
 			PrintWriter out = new PrintWriter(new FileWriter(fichero,false));
-			while(!programQueue.isEmpty())
-				out.print(String.valueOf(programQueue.remove()));
+			while(!colaPrograma.isEmpty())
+				out.print(String.valueOf(colaPrograma.remove()));
 			out.close();
 		}catch(IOException e){
 			System.out.println("Error");
@@ -59,13 +59,13 @@ import java.io.*;
 	}
 }
 
-prog	:	(interfaz|prototipo|declaracionVarGlobal|declaracionVarExterna|declaracionTipo)* 	{print();} 
+prog	:	(interfaz|prototipo|declaracionVarGlobal|declaracionVarExterna|declaracionTipo)* 	{guardar();} 
 	;
 
-prototipo:	modificador* tipo? ID '(' listaParametros ')' ';'
+prototipo:	modificador* tipo? ID parametros ';'
 	;
 
-interfaz:	modificador* tipo? ID parametros cuerpo {queue.addFirst("Funcion " + $ID.text + "\n"); copy(); local.clear();}
+interfaz:	modificador* tipo? ID parametros cuerpo {colaLocal.addFirst("Funcion " + $ID.text + "\n"); localAGlobal(); varLocales.clear();}
 	;
 
 cuerpo	:	'{' cuerpo* '}'
@@ -73,16 +73,16 @@ cuerpo	:	'{' cuerpo* '}'
 	;
 
 	
-declaracionVarExterna : 'extern' declaracionVariable	{programQueue.addFirst("Variable externa " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1] + "\n");
-							extern.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}	
+declaracionVarExterna : 'extern' declaracionVariable	{colaPrograma.addFirst("Variable externa " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1] + "\n");
+							varExternas.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}	
 	;
 
-declaracionVarGlobal : declaracionVariable 		{programQueue.addFirst("Variable global " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1] + "\n");
-							global.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}
+declaracionVarGlobal : declaracionVariable 		{colaPrograma.addFirst("Variable global " + $declaracionVariable.var[0] +" "+ $declaracionVariable.var[1] + "\n");
+							varGlobales.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}
 	;
 
-declaracionVarLocal : declaracionVariable 		{local.put($declaracionVariable.var[1],$declaracionVariable.var[0]);
-							queue.add("	Variable local " + $declaracionVariable.var[0]+ " " +$declaracionVariable.var[1] + "\n");}
+declaracionVarLocal : declaracionVariable 		{colaLocal.add("	Variable local " + $declaracionVariable.var[0]+ " " +$declaracionVariable.var[1] + "\n");
+							varLocales.put($declaracionVariable.var[1],$declaracionVariable.var[0]);}
 	;
 
 declaracionVariable returns [String[] var] :  tipo variable asignacion? (',' variable asignacion?)* ';' {$var = new String[2];$var[0] = $tipo.text;
@@ -98,7 +98,6 @@ asignacion:	('=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=
 	;
 
 modificador: 'typedef'
-	|   'extern'
 	|   'static'
 	|   '_Thread_local'
 	|   'auto'
@@ -138,8 +137,8 @@ sentencia:	declaracionVarLocal
 	|	';'
 	;
 
-llamada	locals[String ambito]:	ID parametros	{$ambito = check($parametros.text);
-						queue.add("	Llama a la función "+ $ID.text +" con los parametros( "+ $ambito +" )" + "\n");}
+llamada	locals[String ambito]:	ID parametros	{$ambito = ambito($parametros.text);
+						colaLocal.add("	Llama a la función "+ $ID.text +" con los parametros( "+ $ambito +" )" + "\n");}
 	;
 
 parametros:	'(' listaParametros? ')'
@@ -148,7 +147,7 @@ parametros:	'(' listaParametros? ')'
 listaParametros:	parametro (',' parametro)*
 	;
 
-parametro:	tipo? expresion			{check($expresion.text, $tipo.text);}
+parametro:	tipo? expresion			{comprobar($expresion.text,$tipo.text);}
 	;
 
 operacion:	operacionSimple+|asignacion
@@ -160,7 +159,7 @@ operacionSimple	:  '>' | '<' | '*' | '/' | '%' | '+' | '-' | '!' | '|' | '&' | '
 cast	:	'(' tipo ')'
 	;
 
-tipo	:	ID+ '*'*
+tipo	:	ID+ ('&'|'*')*
 	;
 
 variable returns[String var]:	('*'*|'&'*) ID array* {$var = $ID.text;}
