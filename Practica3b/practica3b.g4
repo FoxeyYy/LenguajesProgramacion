@@ -147,7 +147,7 @@ parametros:	'(' listaParametros? ')'
 listaParametros:	parametro (',' parametro)*
 	;
 
-parametro:	tipo? expresion			{comprobar($expresion.text,$tipo.text);}
+parametro:	llamada|(tipo? expresion)			{comprobar($expresion.text,$tipo.text);}
 	;
 
 operacion:	operacionSimple+|asignacion
